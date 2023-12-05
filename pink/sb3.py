@@ -117,10 +117,11 @@ class ColoredNoiseDist(SquashedDiagGaussianDistribution):
             self.gen = [ColoredNoiseProcess(beta=b, size=seq_len, rng=rng) for b in self.beta]
 
     def sample(self) -> th.Tensor:
+        device = self.distribution.mean.device
         if np.isscalar(self.beta):
-            cn_sample = th.tensor(self.gen.sample()).float()
+            cn_sample = th.tensor(self.gen.sample()).float().to(device)
         else:
-            cn_sample = th.tensor([cnp.sample() for cnp in self.gen]).float()
+            cn_sample = th.tensor([cnp.sample() for cnp in self.gen]).float().to(device)
         self.gaussian_actions = self.distribution.mean + self.distribution.stddev*cn_sample
         return th.tanh(self.gaussian_actions)
 
